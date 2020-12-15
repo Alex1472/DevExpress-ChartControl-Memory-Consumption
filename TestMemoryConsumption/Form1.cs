@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 using DevExpress.XtraCharts;
+using DevExpress.XtraEditors;
 
 namespace TestMemoryConsumption {
-    public partial class Form1 : Form {
+    public partial class Form1 : XtraForm {
         const int MB = 1024 * 1024; 
 
         Series series;
