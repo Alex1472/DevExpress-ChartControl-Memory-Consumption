@@ -58,14 +58,7 @@ namespace TestMemoryConsumption {
 
         }
         void InitializeSeriesTypes() {
-            object[] viewTypes = new object[] {
-                ViewType.Area, ViewType.BoxPlot, ViewType.Bubble, ViewType.CandleStick, ViewType.FullStackedArea,
-                ViewType.FullStackedBar, ViewType.FullStackedSplineArea, ViewType.Line, ViewType.RangeBar, ViewType.Point,
-                ViewType.ScatterLine, ViewType.Bar, ViewType.SideBySideStackedBar, ViewType.SideBySideFullStackedBar,
-                ViewType.SideBySideRangeBar, ViewType.SplineArea, ViewType.StackedArea, ViewType.StackedBar, ViewType.StackedSplineArea,
-                ViewType.StepLine, ViewType.Stock, ViewType.Waterfall
-            };
-            this.seriesTypeComboBox.Properties.Items.AddRange(viewTypes);
+            this.seriesTypeComboBox.Properties.Items.AddRange(this.seriesViewValueCount.Keys);
             this.seriesTypeComboBox.SelectedItem = ViewType.Line;
         }
         void InitializePointsCount() {
@@ -81,9 +74,10 @@ namespace TestMemoryConsumption {
                 RecreateBindingSeries();
         }
         void RecreateBindingSeries() {
-            List<DataItem> dataSource = DataItem.GenerateDataSource((int)this.pointsCountComboBox.SelectedItem);
+            int valuesCount = this.seriesViewValueCount[(ViewType)this.seriesTypeComboBox.SelectedItem];
+            object dataSource = DataGenerator.GenerateDataSource((int)this.pointsCountComboBox.SelectedItem, valuesCount);
             Prepare();
-            this.series.ValueDataMembers.AddRange(DataItem.GetValueMembers(this.seriesViewValueCount[(ViewType)this.seriesTypeComboBox.SelectedItem]));
+            this.series.ValueDataMembers.AddRange(DataGenerator.GetValueMembers(valuesCount));
             this.series.ArgumentDataMember = "Argument";
 
             if((DataCreationMode)this.seriesCreationTypeComboBox.SelectedItem == DataCreationMode.SeriesDataSource)
@@ -93,7 +87,7 @@ namespace TestMemoryConsumption {
         }
         void RecreateManualCreatedSeries() {
             Prepare();
-            SeriesPoint[] points = DataItem.CreateSeriesPoints((int)this.pointsCountComboBox.SelectedItem);
+            SeriesPoint[] points = DataGenerator.CreateSeriesPoints((int)this.pointsCountComboBox.SelectedItem);
             this.series.Points.AddRange(points);
         }
         void Prepare() {
@@ -139,46 +133,5 @@ namespace TestMemoryConsumption {
 
     public enum DataCreationMode {
         Manual, SeriesDataSource, ChartDataSource
-    }
-
-    public class DataItem {
-        public static List<DataItem> GenerateDataSource(int pointCount) {
-            List<DataItem> dataSource = new List<DataItem>();
-            for(int i = 0; i < pointCount; ++i)
-                dataSource.Add(new DataItem(i, i - 1, i, i + 1, i + 2, i + 3, i + 4, i + 5));
-            return dataSource;
-        }
-        public static SeriesPoint[] CreateSeriesPoints(int pointsCount) {
-            SeriesPoint[] result = new SeriesPoint[pointsCount];
-            for(int i = 0; i < pointsCount; ++i)
-                result[i] = new SeriesPoint(i, i - 1, i, i + 1, i + 2, i + 3, i + 4, i + 5);
-            return result;
-        }
-        public static string[] GetValueMembers(int n) {
-            string[] valueNames = new string[n];
-            for(int i = 0; i < n; i++)
-                valueNames[i] = "Value" + (i + 1).ToString();
-            return valueNames;
-        }
-
-        public double Argument { get; }
-        public double Value1 { get; }
-        public double Value2 { get; }
-        public double Value3 { get; }
-        public double Value4 { get; }
-        public double Value5 { get; }
-        public double Value6 { get; }
-        public double Value7 { get; }
-
-        public DataItem(double argument, double value1, double value2, double value3, double value4, double value5, double value6, double value7) {
-            Argument = argument;
-            Value1 = value1;
-            Value2 = value2;
-            Value3 = value3;
-            Value4 = value4;
-            Value5 = value5;
-            Value6 = value6;
-            Value7 = value7;
-        }
     }
 }
