@@ -43,10 +43,28 @@ namespace TestMemoryConsumption {
                 default: throw new Exception();
             }
         }
-        public static SeriesPoint[] CreateSeriesPoints(int pointsCount) {
+        public static SeriesPoint[] CreateSeriesPoints(int pointsCount, int valuesCount) {
             SeriesPoint[] result = new SeriesPoint[pointsCount];
             for(int i = 0; i < pointsCount; i++)
-                result[i] = new SeriesPoint(i, i - 1, i, i + 1, i + 2, i + 3, i + 4, i + 5);
+                switch(valuesCount) {
+                    case 1:
+                        result[i] = new SeriesPoint(i, i - 1);
+                        break;
+                    case 2:
+                        result[i] = new SeriesPoint(i, i - 1, i);
+                        break;
+                    case 3:
+                        result[i] = new SeriesPoint(i, i - 1, i, i + 1);
+                        break;
+                    case 4:
+                        result[i] = new SeriesPoint(i, i - 1, i, i + 1, i + 2);
+                        break;
+                    case 7:
+                        result[i] = new SeriesPoint(i, i - 1, i, i + 1, i + 2, i + 3, i + 4, i + 5);
+                        break;
+                    default:
+                        throw new Exception();
+                }
             return result;
         }
         public static string[] GetValueMembers(int n) {

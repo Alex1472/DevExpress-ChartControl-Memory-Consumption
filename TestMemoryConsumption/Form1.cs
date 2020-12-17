@@ -87,7 +87,8 @@ namespace TestMemoryConsumption {
         }
         void RecreateManualCreatedSeries() {
             Prepare();
-            SeriesPoint[] points = DataGenerator.CreateSeriesPoints((int)this.pointsCountComboBox.SelectedItem);
+            SeriesPoint[] points = DataGenerator.CreateSeriesPoints((int)this.pointsCountComboBox.SelectedItem, 
+                this.seriesViewValueCount[(ViewType)this.seriesTypeComboBox.SelectedItem]);
             this.series.Points.AddRange(points);
         }
         void Prepare() {
