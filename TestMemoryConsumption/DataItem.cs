@@ -2,7 +2,7 @@
 using DevExpress.XtraCharts;
 
 namespace TestMemoryConsumption {
-    public struct DataGenerator {
+    public static class DataGenerator {
         static object GenerateDataSource1(int pointCount) {
             DataItem1[] dataSource = new DataItem1[pointCount];
             for(int i = 0; i < pointCount; i++)

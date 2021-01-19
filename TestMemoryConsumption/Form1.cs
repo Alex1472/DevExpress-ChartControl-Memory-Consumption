@@ -11,7 +11,16 @@ namespace TestMemoryConsumption {
         Series series;
         double memoryBeforeDataLoading;
         bool isChartPreparing = false;
-        Dictionary<ViewType, int> seriesViewValueCount;
+        Dictionary<ViewType, ChartDataMemberType[]> seriesViewDataMembers;
+
+        ViewType SeriesViewType => (ViewType)this.seriesTypeComboBox.SelectedItem;
+        DataCreationMode SeriesCreationMode => (DataCreationMode)this.seriesCreationTypeComboBox.SelectedItem;
+        int PointsCount => (int)this.pointsCountComboBox.SelectedItem;
+        bool IsNewApi => SeriesCreationMode == DataCreationMode.ManualNewApi || SeriesCreationMode == DataCreationMode.SeriesDataSourceNewApi || SeriesCreationMode == DataCreationMode.ChartDataSourceNewApi;
+        bool IsManualCreation => SeriesCreationMode == DataCreationMode.ManualNewApi || SeriesCreationMode == DataCreationMode.ManualOldApi;
+        bool IsChartDataSource => SeriesCreationMode == DataCreationMode.ChartDataSourceOldApi || SeriesCreationMode == DataCreationMode.ChartDataSourceNewApi;
+        int SeriesValuesCount => this.seriesViewDataMembers[SeriesViewType].Length;
+        DataSourceAdapter DataAdapter => this.series.DataAdapter as DataSourceAdapter;
 
         public Form1() {
             InitializeComponent();
@@ -23,42 +32,47 @@ namespace TestMemoryConsumption {
             this.timer1.Start();
         }
         void InitializeSeriesViewValueDict() {
-            this.seriesViewValueCount = new Dictionary<ViewType, int>();
-            this.seriesViewValueCount.Add(ViewType.Area, 1);
-            this.seriesViewValueCount.Add(ViewType.BoxPlot, 7);
-            this.seriesViewValueCount.Add(ViewType.Bubble, 2);
-            this.seriesViewValueCount.Add(ViewType.CandleStick, 4);
-            this.seriesViewValueCount.Add(ViewType.FullStackedArea, 1);
-            this.seriesViewValueCount.Add(ViewType.FullStackedBar, 1);
-            this.seriesViewValueCount.Add(ViewType.FullStackedSplineArea, 1);
-            this.seriesViewValueCount.Add(ViewType.Line, 1);
-            this.seriesViewValueCount.Add(ViewType.RangeBar, 2);
-            this.seriesViewValueCount.Add(ViewType.Point, 1);
-            this.seriesViewValueCount.Add(ViewType.ScatterLine, 1);
-            this.seriesViewValueCount.Add(ViewType.SideBySideStackedBar, 1);
-            this.seriesViewValueCount.Add(ViewType.SideBySideRangeBar, 2);
-            this.seriesViewValueCount.Add(ViewType.SideBySideFullStackedBar, 1);
-            this.seriesViewValueCount.Add(ViewType.SplineArea, 1);
-            this.seriesViewValueCount.Add(ViewType.StackedBar, 1);
-            this.seriesViewValueCount.Add(ViewType.StackedSplineArea, 1);
-            this.seriesViewValueCount.Add(ViewType.StepLine, 1);
-            this.seriesViewValueCount.Add(ViewType.Stock, 4);
-            this.seriesViewValueCount.Add(ViewType.Waterfall, 1);
-            this.seriesViewValueCount.Add(ViewType.Bar, 1);
+            this.seriesViewDataMembers = new Dictionary<ViewType, ChartDataMemberType[]>();
+            this.seriesViewDataMembers.Add(ViewType.Area, new ChartDataMemberType[] { ChartDataMemberType.Value });
+            this.seriesViewDataMembers.Add(ViewType.BoxPlot, new ChartDataMemberType[] { ChartDataMemberType.BoxPlotMin, ChartDataMemberType.BoxPlotQuartile_1,
+            ChartDataMemberType.BoxPlotMean, ChartDataMemberType.BoxPlotMedian, ChartDataMemberType.BoxPlotQuartile_3, ChartDataMemberType.BoxPlotMax, ChartDataMemberType.BoxPlotOutliers});
+            this.seriesViewDataMembers.Add(ViewType.Bubble, new ChartDataMemberType[] { ChartDataMemberType.Value, ChartDataMemberType.Weight });
+            this.seriesViewDataMembers.Add(ViewType.CandleStick, new ChartDataMemberType[] { ChartDataMemberType.Low, ChartDataMemberType.High, ChartDataMemberType.Open,
+            ChartDataMemberType.Close});
+            this.seriesViewDataMembers.Add(ViewType.FullStackedArea, new ChartDataMemberType[] { ChartDataMemberType.Value });
+            this.seriesViewDataMembers.Add(ViewType.FullStackedBar, new ChartDataMemberType[] { ChartDataMemberType.Value });
+            this.seriesViewDataMembers.Add(ViewType.FullStackedSplineArea, new ChartDataMemberType[] { ChartDataMemberType.Value });
+            this.seriesViewDataMembers.Add(ViewType.Line, new ChartDataMemberType[] { ChartDataMemberType.Value });
+            this.seriesViewDataMembers.Add(ViewType.RangeBar, new ChartDataMemberType[] { ChartDataMemberType.Value_1, ChartDataMemberType.Value_2 });
+            this.seriesViewDataMembers.Add(ViewType.Point, new ChartDataMemberType[] { ChartDataMemberType.Value });
+            this.seriesViewDataMembers.Add(ViewType.ScatterLine, new ChartDataMemberType[] { ChartDataMemberType.Value });
+            this.seriesViewDataMembers.Add(ViewType.SideBySideStackedBar, new ChartDataMemberType[] { ChartDataMemberType.Value });
+            this.seriesViewDataMembers.Add(ViewType.SideBySideRangeBar, new ChartDataMemberType[] { ChartDataMemberType.Value_1, ChartDataMemberType.Value_2 });
+            this.seriesViewDataMembers.Add(ViewType.SideBySideFullStackedBar, new ChartDataMemberType[] { ChartDataMemberType.Value });
+            this.seriesViewDataMembers.Add(ViewType.SplineArea, new ChartDataMemberType[] { ChartDataMemberType.Value });
+            this.seriesViewDataMembers.Add(ViewType.StackedBar, new ChartDataMemberType[] { ChartDataMemberType.Value });
+            this.seriesViewDataMembers.Add(ViewType.StackedSplineArea, new ChartDataMemberType[] { ChartDataMemberType.Value });
+            this.seriesViewDataMembers.Add(ViewType.StepLine, new ChartDataMemberType[] { ChartDataMemberType.Value });
+            this.seriesViewDataMembers.Add(ViewType.Stock, new ChartDataMemberType[] { ChartDataMemberType.Low, ChartDataMemberType.High, ChartDataMemberType.Open,
+            ChartDataMemberType.Close});
+            this.seriesViewDataMembers.Add(ViewType.Waterfall, new ChartDataMemberType[] { ChartDataMemberType.Value });
+            this.seriesViewDataMembers.Add(ViewType.Bar, new ChartDataMemberType[] { ChartDataMemberType.Value });
         }
         void InitializeSeriesCreationType() {
-            this.seriesCreationTypeComboBox.Properties.Items.Add(DataCreationMode.SeriesDataSource);
-            this.seriesCreationTypeComboBox.Properties.Items.Add(DataCreationMode.Manual);
-            this.seriesCreationTypeComboBox.Properties.Items.Add(DataCreationMode.ChartDataSource);
+            this.seriesCreationTypeComboBox.Properties.Items.Add(DataCreationMode.SeriesDataSourceOldApi);
+            this.seriesCreationTypeComboBox.Properties.Items.Add(DataCreationMode.ManualOldApi);
+            this.seriesCreationTypeComboBox.Properties.Items.Add(DataCreationMode.ChartDataSourceOldApi);
+            this.seriesCreationTypeComboBox.Properties.Items.Add(DataCreationMode.SeriesDataSourceNewApi);
+            this.seriesCreationTypeComboBox.Properties.Items.Add(DataCreationMode.ManualNewApi);
+            this.seriesCreationTypeComboBox.Properties.Items.Add(DataCreationMode.ChartDataSourceNewApi);
             this.seriesCreationTypeComboBox.SelectedIndex = 0;
         }
         void InitializeChart() {
             this.chartControl1.CrosshairEnabled = DevExpress.Utils.DefaultBoolean.False;
             this.chartControl1.Legend.Visibility = DevExpress.Utils.DefaultBoolean.False;
-
         }
         void InitializeSeriesTypes() {
-            this.seriesTypeComboBox.Properties.Items.AddRange(this.seriesViewValueCount.Keys);
+            this.seriesTypeComboBox.Properties.Items.AddRange(this.seriesViewDataMembers.Keys);
             this.seriesTypeComboBox.SelectedItem = ViewType.Line;
         }
         void InitializePointsCount() {
@@ -68,28 +82,54 @@ namespace TestMemoryConsumption {
         void RecreateSeries() {
             if(this.seriesCreationTypeComboBox.SelectedItem == null)
                 return;
-            if((DataCreationMode)this.seriesCreationTypeComboBox.SelectedItem == DataCreationMode.Manual)
+            if(IsManualCreation)
                 RecreateManualCreatedSeries();
             else
                 RecreateBindingSeries();
         }
         void RecreateBindingSeries() {
-            int valuesCount = this.seriesViewValueCount[(ViewType)this.seriesTypeComboBox.SelectedItem];
-            object dataSource = DataGenerator.GenerateDataSource((int)this.pointsCountComboBox.SelectedItem, valuesCount);
+            object dataSource = DataGenerator.GenerateDataSource(PointsCount, SeriesValuesCount);
             Prepare();
-            this.series.ValueDataMembers.AddRange(DataGenerator.GetValueMembers(valuesCount));
-            this.series.ArgumentDataMember = "Argument";
-
-            if((DataCreationMode)this.seriesCreationTypeComboBox.SelectedItem == DataCreationMode.SeriesDataSource)
-                this.series.DataSource = dataSource;
+            if(IsNewApi)
+                PrepareDataMembersNewApi();
             else
+                PrepareDataMembersOldApi();
+            AssignDataSource(dataSource);
+        }
+        void AssignDataSource(object dataSource) {
+            if(IsChartDataSource) {
                 this.chartControl1.DataSource = dataSource;
+                return;
+            }
+            if(IsNewApi)
+                DataAdapter.DataSource = dataSource;
+            else
+                this.series.DataSource = dataSource;
+        }
+        void PrepareDataMembersNewApi() {
+            DataSourceAdapter dataAdapter = new DataSourceAdapter();
+            dataAdapter.DataMembers.Add(new DataMember(ChartDataMemberType.Argument, "Argument"));
+            ChartDataMemberType[] valueDataMembers = this.seriesViewDataMembers[SeriesViewType];
+            string[] columnNames = DataGenerator.GetValueMembers(SeriesValuesCount);
+            for(int i = 0; i < valueDataMembers.Length; i++)
+                dataAdapter.DataMembers.Add(new DataMember(valueDataMembers[i], columnNames[i]));
+            this.series.DataAdapter = dataAdapter;
+        }
+        void PrepareDataMembersOldApi() {
+            this.series.ValueDataMembers.AddRange(DataGenerator.GetValueMembers(SeriesValuesCount));
+            this.series.ArgumentDataMember = "Argument";
         }
         void RecreateManualCreatedSeries() {
             Prepare();
-            SeriesPoint[] points = DataGenerator.CreateSeriesPoints((int)this.pointsCountComboBox.SelectedItem, 
-                this.seriesViewValueCount[(ViewType)this.seriesTypeComboBox.SelectedItem]);
-            this.series.Points.AddRange(points);
+            AssingPoints(DataGenerator.CreateSeriesPoints(PointsCount, SeriesValuesCount));
+        }
+        void AssingPoints(SeriesPoint[] points) {
+            if(IsNewApi) {
+                SeriesPointCollection adapter = new SeriesPointCollection();
+                adapter.AddRange(points);
+                this.series.DataAdapter = adapter;
+            } else 
+                this.series.Points.AddRange(points);
         }
         void Prepare() {
             this.isChartPreparing = true;
@@ -97,7 +137,7 @@ namespace TestMemoryConsumption {
             this.chartControl1.Series.Clear();
             this.series = new Series();
             this.chartControl1.Series.Add(this.series);
-            this.series.ChangeView((ViewType)this.seriesTypeComboBox.SelectedItem);
+            this.series.ChangeView(SeriesViewType);
             this.chartControl1.Update();
             this.memoryBeforeDataLoading = GetTotalMemory();
             this.isChartPreparing = false;
@@ -118,21 +158,18 @@ namespace TestMemoryConsumption {
         void Timer1_Tick(object sender, EventArgs e) {
             UpdateMemoryUsage();
         }
-
         void SeriesTypeComboBox_SelectedIndexChanged(object sender, EventArgs e) {
             RecreateSeries();
         }
-
         void PointsCountComboBox_SelectedIndexChanged_1(object sender, EventArgs e) {
             RecreateSeries();
         }
-
         void SeriesCreationTypeComboBox_SelectedIndexChanged_1(object sender, EventArgs e) {
             RecreateSeries();
         }
     }
 
     public enum DataCreationMode {
-        Manual, SeriesDataSource, ChartDataSource
+        ManualOldApi, SeriesDataSourceOldApi, ChartDataSourceOldApi, ManualNewApi, SeriesDataSourceNewApi, ChartDataSourceNewApi
     }
 }
