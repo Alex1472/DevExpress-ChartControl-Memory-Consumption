@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using DevExpress.XtraCharts;
 
 namespace TestMemoryConsumption {
@@ -67,27 +68,56 @@ namespace TestMemoryConsumption {
                 }
             return result;
         }
+        static ChartDataMemberType[] GetValueMembers(ViewType view) {
+            switch (view) {
+                case ViewType.Line: return new[] { ChartDataMemberType.Value };
+                case ViewType.RangeBar: return new[] { ChartDataMemberType.Value_1, ChartDataMemberType.Value_2 };
+                case ViewType.CandleStick: return new[] { ChartDataMemberType.Low, ChartDataMemberType.High, ChartDataMemberType.Open, ChartDataMemberType.Close };
+                case ViewType.BoxPlot:
+                    return new[] { ChartDataMemberType.BoxPlotMin, ChartDataMemberType.BoxPlotQuartile_1, ChartDataMemberType.BoxPlotMean,
+                    ChartDataMemberType.BoxPlotMedian, ChartDataMemberType.BoxPlotQuartile_3, ChartDataMemberType.BoxPlotMax, ChartDataMemberType.BoxPlotOutliers };
+                default: throw new Exception();
+            }
+        }
         public static string[] GetValueMembers(int n) {
             string[] valueNames = new string[n];
             for(int i = 0; i < n; i++)
                 valueNames[i] = "Value" + (i + 1).ToString();
             return valueNames;
         }
+        public static Dictionary<ChartDataMemberType, string> GetValueMembers(ViewType view, int n) {
+            Dictionary<ChartDataMemberType, string> result = new Dictionary<ChartDataMemberType, string>(n);
+            ChartDataMemberType[] members = GetValueMembers(view);
+            for (int i = 0; i < n; i++)
+                result.Add(members[i], "Value" + (i + 1).ToString());
+            return result;
+        }
+        public static IChartDataAdapter GetDataAdapter(int valuesCount, int pointsCount) {
+            switch (valuesCount) {
+                case 1: return new MemoryConsumptionCustomAdapterBase.CustomAdapter1(pointsCount);
+                case 2: return new MemoryConsumptionCustomAdapterBase.CustomAdapter2(pointsCount);
+                case 4: return new MemoryConsumptionCustomAdapterBase.CustomAdapter4(pointsCount);
+                case 7: return new MemoryConsumptionCustomAdapterBase.CustomAdapter7(pointsCount);
+                default: throw new Exception();
+            }
+        }
     }
 
-    public struct DataItem1 {
+    public class DataItem1 {
         public double Argument { get; }
         public double Value1 { get; }
+        public string Name { get { return "Name"; } }
 
         public DataItem1(double argument, double value) {
             Argument = argument;
             Value1 = value;
         }
     }
-    public struct DataItem2 {
+    public class DataItem2 {
         public double Argument { get; }
         public double Value1 { get; }
         public double Value2 { get; }
+        public string Name { get { return "Name"; } }
 
         public DataItem2(double argument, double value1, double value2) {
             Argument = argument;
@@ -95,11 +125,12 @@ namespace TestMemoryConsumption {
             Value2 = value2;
         }
     }
-    public struct DataItem3 {
+    public class DataItem3 {
         public double Argument { get; }
         public double Value1 { get; }
         public double Value2 { get; }
         public double Value3 { get; }
+        public string Name { get { return "Name"; } }
 
         public DataItem3(double argument, double value1, double value2, double value3) {
             Argument = argument;
@@ -108,12 +139,13 @@ namespace TestMemoryConsumption {
             Value3 = value3;
         }
     }
-    public struct DataItem4 {
+    public class DataItem4 {
         public double Argument { get; }
         public double Value1 { get; }
         public double Value2 { get; }
         public double Value3 { get; }
         public double Value4 { get; }
+        public string Name { get { return "Name"; } }
 
         public DataItem4(double argument, double value1, double value2, double value3, double value4) {
             Argument = argument;
@@ -123,7 +155,7 @@ namespace TestMemoryConsumption {
             Value4 = value4;
         }
     }
-    public struct DataItem7 {
+    public class DataItem7 {
         public double Argument { get; }
         public double Value1 { get; }
         public double Value2 { get; }
@@ -132,6 +164,7 @@ namespace TestMemoryConsumption {
         public double Value5 { get; }
         public double Value6 { get; }
         public double Value7 { get; }
+        public string Name { get { return "Name"; } }
 
         public DataItem7(double argument, double value1, double value2, double value3, double value4, double value5, double value6, double value7) {
             Argument = argument;
